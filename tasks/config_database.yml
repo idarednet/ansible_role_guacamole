@@ -13,7 +13,9 @@
 - name: Set root password for mariadb
   mysql_user:
     name: root
-    host: "{{ MYSQL_HOSTNAME }}"
+    login_user: root
+    login_password: ""
+    login_host: "{{ MYSQL_HOSTNAME }}"
     password: "{{ DB_PASSWD }}"
     state: present
   ignore_errors: true   # PASSWORD ALREADY SET
@@ -26,26 +28,6 @@
     host: "{{ MYSQL_HOSTNAME }}"
     state: absent
 
-- name: Delete Anonymous Users {{ ansible_fqdn }}
-  mysql_user:
-    name: ""
-    login_user: root
-    login_password: "{{ DB_PASSWD }}"
-    host: "{{ ansible_fqdn }}"
-    state: absent
-
-- name: Remove root remote access
-  mysql_user:
-    name: root'
-    login_user: root
-    login_password: "{{ DB_PASSWD }}"
-    password: "{{ DB_PASSWD }}"
-    host: "{{ item }}"
-  loop:
-    - "::1"
-    - "127.0.0.1"
-    - "localhost"
-
 - name: Remove test database
   mysql_db:
     db: test
@@ -54,15 +36,54 @@
     state: absent
 
 # TODO: CLEANUP - USE MYSQL MODULE
+
 - name: Create {{ DB_NAME }} Database
-  command: 'mysql -u root -p{{ DB_PASSWD }} -e "CREATE DATABASE {{ DB_NAME }};"'
+  mysql_db:
+    name: "{{ DB_NAME }}"
+    login_user: root
+    login_password: "{{ DB_PASSWD }}"
+    state: present
 
 - name: Grant User access to Database
-  shell: 'mysql -u root -p {{ DB_PASSWD }} -e "GRANT SELECT,INSERT,UPDATE,DELETE ON {{ DB_NAME }}.* TO {{ DB_USER }}@localhost IDENTIFIED BY {{ DB_PASSWD }};"'
+  mysql_user:
+    name: "{{ DB_USER }}"
+    password: "{{ DB_PASSWD }}"
+    login_user: root
+    login_password: "{{ DB_PASSWD }}"
+    priv: "{{ DB_NAME }}.*:ALL,GRANT"
+    state: present
 
-- name: Flush Priviledges
-  command: 'mysql -u root -p {{ MYSQL_PASSWD }} -e "FLUSH PRIVILEGES;"'
+- name: Import Database
+  mysql_db:
+    name: "{{ DB_NAME }}"
+    login_user: root
+    login_password: "{{ DB_PASSWD }}"
+    state: import
+    target: "{{ INSTALL_DIR }}extension/mysql/schema/{{ item }}.sql"
+  ignore_errors: true    # Database already contains info
+  loop:
+    - 001-create-schema
+    - 002-create-admin-user
 
-- name: Create Guacamole Database
-  shell: "cat extension/mysql/schema/*.sql | mysql -u root -p {{ DB_PASSWD }} -D {{ DB_NAME }}"
+- name: Insert timezone info into mysql database
+  shell: "/usr/bin/mysql_tzinfo_to_sql /usr/share/zoneinfo | mysql -u root mysql -p{{ DB_PASSWD }}"
+  args:
+    warn: no
+
+- name: Get Timezone Info
+  shell:  "timedatectl | grep 'Time zone:' | awk '{ print $3 }'"
+  args:
+    warn: no
+  register: timezone
+
+- name: Insert {{ timezone.stdout }} into /etc/my.cnf
+  lineinfile:
+    path: /etc/my.cnf
+    insertafter: "^\\[mysqld\\]"
+    line: "default-time-zone={{ timezone.stdout }}"
+   
+- name: Restart mariadb service
+  service:
+    name: mariadb
+    state: restarted
 

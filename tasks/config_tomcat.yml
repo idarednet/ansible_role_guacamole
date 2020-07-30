@@ -1,0 +1,45 @@
+---
+- name: Insert URIEncoding Line in the {{ TOMCAT_CONF_DIR }}{{ TOMCAT_CONF }} file
+  lineinfile:
+    path: "{{ TOMCAT_CONF_DIR }}{{ TOMCAT_CONF }}"
+    insertafter: 'Connector port="8080" protocol="HTTP\/1.1"'
+    line: '               URIEncoding="UTF-8"'
+    firstmatch: true
+    state: present
+
+- name: Insert Line in the {{ TOMCAT_CONF_DIR }}{{ TOMCAT_CONF }} file
+  lineinfile:
+    path:  "{{ TOMCAT_CONF_DIR }}{{ TOMCAT_CONF }}"
+    insertbefore: '<Connector port="8009" protocol="AJP\/1.3" redirectPort="8443" \/>'
+    line: '    <Connector port="8443" protocol="HTTP/1.1" SSLEnabled="true" maxThreads="150" scheme="https" secure="true" clientAuth="false" sslProtocol="TLS" keystoreFile="/var/lib/tomcat/webapps/.keystore" keystorePass="{{ JKS_GUAC_PASSWD }}" URIEncoding="UTF-8" />'
+    firstmatch: true
+    state: present
+
+- name: Insert Line in the {{ TOMCAT_CONF_DIR }}{{ TOMCAT_CONF }} file
+  lineinfile:
+    path:  "{{ TOMCAT_CONF_DIR }}{{ TOMCAT_CONF }}"
+    insertafter: '\/Host>'
+    line: '      <Valve className="org.apache.catalina.valves.RemoteIpValve" internalProxies="{{ ansible_default_ipv4.address }}" remoteIpHeader="x-forwarded-for" remoteIpProxiesHeader="x-forwarded-by" protocolHeader="x-forwarded-proto" />'
+    state: present
+
+- name: Insert Line in the {{ TOMCAT_CONF_DIR }}{{ TOMCAT_CONF }} file
+  lineinfile:
+    path:  "{{ TOMCAT_CONF_DIR }}{{ TOMCAT_CONF }}"
+    insertafter: '<\/Host>'
+    line: '      <Valve className="org.apache.catalina.valves.ErrorReportValve" showReport="false" showServerInfo="false"/>'
+    state: present
+
+- name: Java KeyStore Delete and existing Guacamole Alias in KeyStore
+  command: "/usr/bin/keytool -delete -noprompt -alias Guacamole -keystore /var/lib/tomcat/webapps/.keystore -storepass {{ JKS_GUAC_PASSWD }}"
+  failed_when: false
+
+- name: Java KeyStore Guacamole Alias Setup
+  command: "/usr/bin/keytool -genkey -alias Guacamole -keyalg RSA -keysize {{ JKSTORE_KEY_SIZE }} -keystore /var/lib/tomcat/webapps/.keystore -storepass {{ JKS_GUAC_PASSWD }} -keypass {{ JKS_GUAC_PASSWD }} -noprompt -dname \"CN='', OU='', O='', L='', S='', C=''\""
+
+- name: Restart tomcat and guacd services
+  service:
+    name: "{{ item }}"
+    state: restarted 
+  loop:
+    - tomcat
+    - guacd

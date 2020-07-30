@@ -17,7 +17,7 @@ MYSQL_PORT: "3306"
 MYSQL_HOSTNAME: localhost
 
 # KEY SIZES
-#JKSTORE_KEY_SIZE_DEF: "4096" # Default Java Keystore key-size
+JKSTORE_KEY_SIZE: "4096" # Default Java Keystore key-size
 #LE_KEY_SIZE_DEF: "4096" # Default Let's Encrypt key-size
 #SSL_KEY_SIZE_DEF: "4096" # Default Self-signed SSL key-size
 
@@ -26,7 +26,7 @@ GUACD_USER: "guacd"
 DB_NAME: "guac_db" # Default database name
 DB_USER: "guac_adm" # Default database user name
 DB_PASSWD: "guacamole" # Default database password
-#JKS_GUAC_PASSWD_DEF: "guacamole" # Default Java Keystore password
+JKS_GUAC_PASSWD: "guacamole" # Default Java Keystore password
 #JKS_CACERT_PASSWD_DEF: "guacamole" # Default CACert Java Keystore password, used with LDAPS
 
 # URLS
@@ -35,6 +35,7 @@ MYSQL_CON_URL: "https://dev.mysql.com/get/Downloads/Connector-J/"
 
 # FILE NAMES
 GUAC_CONF: "guacamole.properties" # Guacamole configuration/properties file
+TOMCAT_CONF: "server.xml"
 #MYSQL_CON: "mysql-connector-java-${MYSQL_CON_VER}"
 
 
@@ -72,6 +73,7 @@ REQUIRED_DEPENDENCIES:
 
 ## DIRECTORIES
 GUAC_CONF_DIR: "/etc/guacamole/"
+TOMCAT_CONF_DIR: "/etc/tomcat/"
 LIB_DIR: "/var/lib/guacamole/"
 INSTALL_DIR:  "/usr/local/src/guacamole/{{ GUAC_VER }}/"
 NEW_DIRS:
