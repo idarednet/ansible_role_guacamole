@@ -1,0 +1,32 @@
+---
+- name: Set selinux boolean flags on and keep it persistent across reboots
+  seboolean:
+    name: "{{ item }}"
+    state: yes
+    persistent: yes
+  loop:
+    - httpd_can_network_connect
+    - httpd_can_network_relay
+    - tomcat_can_network_connect_db
+
+- name: Set selinux Guacamole Client context
+  sefcontext:
+    target: "{{ LIB_DIR }}guacamole.war"
+    setype: tomcat_exec_t
+    state: present
+
+- name: Set selinux JDBC Extension Context
+  sefcontext:
+    target: "{{ LIB_DIR }}extensions/guacamole-auth-jdbc-mysql-{{ GUAC_VER }}.jar"
+    setype: tomcat_exec_t
+    state: present
+
+
+- name: Set selinux MySQL Connector Extension Context
+  sefcontext:
+    target: "{{ LIB_DIR }}lib/{{ MYSQL_CON }}.jar"
+    setype: tomcat_exec_t
+    state: present
+
+- name: Restore secontext recursively to {{ LIB_DIR }}
+  command: "restorecon -irv {{ LIB_DIR }}"

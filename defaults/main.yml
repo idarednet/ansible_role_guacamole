@@ -1,6 +1,4 @@
 ---
-#ADM_POC: "Local Admin, admin@admin.com"
-
 # VERSIONS - NAMES
 GUAC_VER: "1.2.0" # Latest stable version of Guac from https://guacamole.apache.org/releases/
 GUAC_SERVER: "guacamole-server-{{ GUAC_VER }}"
@@ -18,8 +16,6 @@ MYSQL_HOSTNAME: localhost
 
 # KEY SIZES
 JKSTORE_KEY_SIZE: "4096" # Default Java Keystore key-size
-#LE_KEY_SIZE_DEF: "4096" # Default Let's Encrypt key-size
-#SSL_KEY_SIZE_DEF: "4096" # Default Self-signed SSL key-size
 
 # DEFAULT CREDENTIALS
 GUACD_USER: "guacd"
@@ -27,17 +23,15 @@ DB_NAME: "guac_db" # Default database name
 DB_USER: "guac_adm" # Default database user name
 DB_PASSWD: "guacamole" # Default database password
 JKS_GUAC_PASSWD: "guacamole" # Default Java Keystore password
-#JKS_CACERT_PASSWD_DEF: "guacamole" # Default CACert Java Keystore password, used with LDAPS
 
 # URLS
 GUAC_URL: "https://apache.org/dyn/closer.cgi?action=download&filename=guacamole/{{ GUAC_VER }}/"
 MYSQL_CON_URL: "https://dev.mysql.com/get/Downloads/Connector-J/"
+GUAC_URIPATH: "/guacamole/"
 
 # FILE NAMES
 GUAC_CONF: "guacamole.properties" # Guacamole configuration/properties file
 TOMCAT_CONF: "server.xml"
-#MYSQL_CON: "mysql-connector-java-${MYSQL_CON_VER}"
-
 
 ## YUM REPOS - PACKAGES
 FUSION_REPOS:

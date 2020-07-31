@@ -1,2 +1,10 @@
 ---
-# handlers file for guacamole-lab
+- name: Restart Services
+  service:
+    name: "{{ item }}"
+    state: restarted
+  loop:
+    - tomcat
+    - guacd
+    - mariadb
+    - nginx
