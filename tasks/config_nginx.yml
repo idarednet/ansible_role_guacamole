@@ -10,10 +10,10 @@
     src: guacamole.conf.j2
     dest: /etc/nginx/conf.d/guacamole.conf
 
-- name: Generate nginx ssl conf file
-  template:
-    src: guacamole_ssl.conf.j2
-    dest: /etc/nginx/conf.d/guacamole_ssl.conf
+#- name: Generate nginx ssl conf file
+#  template:
+#    src: guacamole_ssl.conf.j2
+#    dest: /etc/nginx/conf.d/guacamole_ssl.conf
 
 - name: chmod all nginx directories 750 
   command: find /etc/nginx -type d -exec chmod 750 {} \;

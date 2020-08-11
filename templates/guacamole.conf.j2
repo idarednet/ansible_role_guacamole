@@ -1,7 +1,7 @@
 server {
 	listen 80;
 	listen [::]:80;
-	server_name {{ GUAC_HOSTNAME }};
+	server_name {{ ansible_default_ipv4.address }};
 	#return 301 https://$host$request_uri;
 	location {{ GUAC_URIPATH }} {
 		proxy_pass http://{{ ansible_default_ipv4.address }}:8080/guacamole/;
